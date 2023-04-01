@@ -9,12 +9,10 @@ the main goal was to add google login and flask-login
 4. cd todo
 4. create a file called secrets.py
 5. in secrets.py add 
-`
-google_auth = {
+`google_auth = {
     "client_id": "YOUR-GOOGLE-CLIENT-ID,
     "client_secret": "YOUR-GOOGLE-SECRET"
 }
-
 `
 6. cd back to simple-todo-flask dir
 7. python db_init.py
