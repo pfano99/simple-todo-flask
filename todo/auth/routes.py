@@ -1,9 +1,8 @@
-from flask import Blueprint, redirect, url_for, render_template, abort
-from flask_login import login_user, logout_user, login_required
+from flask import Blueprint, redirect, url_for, render_template
+from flask_login import login_required
 
-from todo import bcrypt, db
 from todo.auth.form import LoginForm, SignUpForm
-from todo.models import User
+from todo.auth.service import add_user, google_login, google_login_response, _login_user, _logout_user
 
 auth = Blueprint('Auth', __name__)
 
@@ -12,9 +11,7 @@ auth = Blueprint('Auth', __name__)
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        if user and bcrypt.check_password_hash(user.password, form.password.data):
-            login_user(user)
+        _login_user(email=form.email.data, password=form.password.data)
         return redirect(url_for('Main.index'))
     return render_template("auth/login.html", form=form)
 
@@ -23,17 +20,25 @@ def login():
 def signup():
     form = SignUpForm()
     if form.validate_on_submit():
-        _password = bcrypt.generate_password_hash(form.password.data)
-        user = User(first_name=form.first_name.name, last_name=form.last_name.data, email=form.email.data,
-                    password=_password)
-        db.session.add(user)
-        db.session.commit()
+        add_user(first_name=form.first_name.data, last_name=form.last_name.data, email=form.email.data,
+                 password=form.password.data, auth_type="default")
         return redirect(url_for('Main.index'))
     return render_template("auth/signup.html", form=form)
+
+
+@auth.route("/google")
+def google():
+    return google_login(url_for('Auth.google_auth', _external=True))
+
+
+@auth.route('/google/auth')
+def google_auth():
+    google_login_response()
+    return redirect('/')
 
 
 @auth.route("/logout")
 @login_required
 def logout():
-    logout_user()
+    _logout_user()
     return redirect(url_for("Main.index"))

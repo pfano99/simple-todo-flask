@@ -2,9 +2,11 @@ from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
+from authlib.integrations.flask_client import OAuth
 
 app = Flask(__name__)
 db = SQLAlchemy()
+oauth = OAuth(app)
 
 app.config['SECRET_KEY'] = 'THISISTHEKEY'
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///project.db"
